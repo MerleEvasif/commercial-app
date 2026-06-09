@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CommercialApp - NextGen</title>
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-light: #eff6ff;
+  --success: #16a34a;
+  --success-light: #f0fdf4;
+  --warning: #ea580c;
+  --warning-light: #fff7ed;
+  --danger: #dc2626;
+  --danger-light: #fef2f2;
+  --neutral-dark: #0f172a;
+  --neutral-light: #f8fafc;
+  --border: #e2e8f0;
+  --text-secondary: #64748b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: #0f172a; /* Fond sombre pour faire ressortir le mockup mobile */
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+}
+
+/* Container de l'application type Smartphone */
+.app { 
+  width: 100%; 
+  max-width: 430px; 
+  height: 880px;
+  background: #f1f5f9;
+  border-radius: 40px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  border: 8px solid #334155;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+/* 1. Header Fixe */
+.header {
+  background: #fff;
+  padding: 20px 20px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+.header-name { font-size: 17px; font-weight: 700; color: var(--neutral-dark); }
+.header-sub  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--primary-light); color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+}
+
+/* Zone de contenu défilante */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  padding-bottom: 90px; /* Espace pour la navigation basse */
+  background: #f8fafc;
+}
+
+.screen { display: none; }
+.screen.active { display: block; animation: fadeIn 0.25s ease-out; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Alertes Flash (Vue Voiture) */
+.alert-flash {
+  background: var(--danger-light);
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.alert-flash-icon { font-size: 20px; animation: pulse 2s infinite; }
+.alert-flash-text { font-size: 13px; font-weight: 600; color: var(--danger); }
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Grille de statistiques simplifiée */
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat { background: #fff; border-radius: 14px; padding: 14px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+.stat-n { font-size: 24px; font-weight: 800; color: var(--neutral-dark); }
+.stat-l { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-top: 2px; }
+
+/* Libellés de Section */
+.section-title {
+  font-size: 11px; color: var(--text-secondary); text-transform: uppercase;
+  letter-spacing: .08em; margin: 16px 0 8px; font-weight: 700;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* Cartes (Cards) Style IOS modernisé */
+.card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 16px; padding: 14px; margin-bottom: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01), 0 2px 4px -1px rgba(0,0,0,0.01);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:active { transform: scale(0.99); }
+.card-title { font-size: 14px; font-weight: 700; color: var(--neutral-dark); }
+.card-sub   { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.card-row   { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+
+/* Raccords de bordure pour l'état de l'agenda */
+.card-border-success { border-left: 4px solid var(--success); }
+.card-border-warning { border-left: 4px solid var(--warning); }
+.card-border-primary { border-left: 4px solid var(--primary); }
+
+/* Avatars des lignes */
+.av {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+.av-blue   { background: var(--primary-light); color: var(--primary); }
+.av-purple { background: #f5f3ff; color: #6d28d9; }
+.av-amber  { background: var(--warning-light); color: var(--warning); }
+.av-row { display: flex; align-items: center; gap: 12px; }
+
+/* Badges de statuts */
+.badge {
+  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 8px; white-space: nowrap;
+}
+.b-warn   { background: var(--warning-light); color: var(--warning); }
+.b-ok     { background: var(--success-light); color: var(--success); }
+.b-danger { background: var(--danger-light); color: var(--danger); }
+.b-gray   { background: #f1f5f9; color: var(--text-secondary); }
+.b-info   { background: var(--primary-light); color: var(--primary); }
+
+/* Jetons (Chips) */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.chip {
+  font-size: 11px; padding: 3px 10px; border-radius: 8px;
+  background: #f1f5f9; color: #475569; font-weight: 500;
+}
+
+/* Ligne de séparation douce */
+.div { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+/* Barre de progression (Devis Vivants) */
+.pbar { height: 6px; background: #e2e8f0; border-radius: 4px; margin-top: 10px; overflow: hidden; }
+.pfill { height: 100%; border-radius: 4px; transition: width 0.5s ease-out; }
+
+/* Événements en temps réel (Devis ou Tracking) */
+.live-indicator {
+  font-size: 11px; color: var(--success); display: flex; align-items: center; gap: 4px; font-weight: 600; margin-top: 8px;
+}
+.live-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: blink 1.5s infinite; }
+
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Boutons IA Majeurs */
+.btn-ai-action {
+  width: 100%; padding: 14px; border-radius: 14px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed); color: white;
+  font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center;
+  gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); transition: all 0.2s;
+  margin-top: 8px;
+}
+.btn-ai-action:active { transform: scale(0.98); opacity: 0.95; }
+
+.btn-outline-ai {
+  width: 100%; padding: 12px; border-radius: 12px;
+  background: #fff; border: 1px dashed #c084fc; color: #7c3aed;
+  font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 8px;
+}
+
+/* To-Do interactifs */
+.todo-row { display: flex; align-items: center; gap: 12px; padding: 4px 0; cursor: pointer; }
+.todo-check {
+  width: 18px; height: 18px; border-radius: 6px; border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.todo-row.done .todo-check { background: var(--success); border-color: var(--success); }
+.todo-row.done .todo-check::after { content: "✓"; color: white; font-size: 11px; font-weight: bold; }
+.todo-row.done .todo-title { text-decoration: line-through; color: var(--text-secondary); }
+
+/* 2. Navigation Basse (Style Mobile App) */
+.nav-bar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 76px; background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-around; align-items: center;
+  padding-bottom: 12px; /* Laisse de l'espace pour le bouton home virtuel */
+  z-index: 100;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  color: var(--text-secondary); font-size: 10px; font-weight: 600; width: 60px;
+}
+.nav-item font-icon { font-size: 20px; }
+.nav-item.active { color: var(--primary); }
+
+/* Panneaux d'affichage intelligents ou volets contextuels */
+.panel-ai {
+  background: #f0f7ff; border: 1px solid #bae6fd; border-radius: 14px; padding: 12px; margin-top: 10px;
+}
+.panel-ai-title { font-size: 12px; font-weight: 700; color: #0369a1; display: flex; align-items: center; gap: 6px; }
+.panel-ai-body { font-size: 12px; color: #0c4a6e; margin-top: 6px; line-height: 1.4; }
+
+/* Dictée Vocale Simulateur */
+.dictation-box {
+  background: #fff; border: 2px dashed var(--primary); border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 16px;
+}
+.mic-btn {
+  width: 56px; height: 56px; background: var(--primary-light); color: var(--primary);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 12px;
+  transition: all 0.2s;
+}
+.mic-btn.recording { background: var(--danger); color: white; animation: pulse 1.2s infinite; }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Header Global -->
+  <div class="header">
+    <div>
+      <div class="header-name">Bonjour, Marc 👋</div>
+      <div class="header-sub">
+        <span>🚗 En déplacement</span> · <span>Paris, 11:13</span>
+      </div>
+    </div>
+    <div class="avatar">MR</div>
+  </div>
+
+  <!-- ZONE DE CONTENU PRINCIPALE (Écrans interchangeables) -->
+  <div class="content">
+
+    <!-- ================= 1. TABLEAU DE BORD (Vue Voiture / Matin) ================= -->
+    <div id="home" class="screen active">
+      <!-- Alerte Critique Flash -->
+      <div class="alert-flash" onclick="showTab('devis', document.getElementById('nav-devis'))">
+        <div class="alert-flash-icon">⚠️</div>
+        <div>
+          <div class="alert-flash-text">Relance urgente nécessaire</div>
+          <div style="font-size:11px; color:#7f1d1d">Devis Airbus expiré depuis 3 jours (32k€)</div>
+        </div>
+      </div>
+
+      <!-- KPI prioritaires -->
+      <div class="stats">
+        <div class="stat"><div class="stat-n">2</div><div class="stat-l">📅 RDV restants</div></div>
+        <div class="stat"><div class="stat-n">124k€</div><div class="stat-l">📈 Pipeline Actif</div></div>
+      </div>
+
+      <!-- Prochain RDV avec temps de trajet réel -->
+      <div class="section-title"><span>Prochain objectif</span> <span style="color:var(--primary)">GPS Synchro</span></div>
+      <div class="card card-border-warning" style="background: #fffbeb;">
+        <div class="card-row">
+          <div class="av-row">
+            <div class="av av-purple">LM</div>
+            <div>
+              <div class="card-title">Laurent Morel</div>
+              <div class="card-sub">Bouygues · Renouvellement</div>
+            </div>
+          </div>
+          <span class="badge b-warn">14h30</span>
+        </div>
+        <div style="font-size:12px; font-weight: 600; color:#b45309; display:flex; align-items:center; gap:4px; margin: 8px 0;">
+          📍 Tour Arago, La Défense · ⏱️ 35 min (Fluide)
+        </div>
+        <div class="chips">
+          <span class="chip">Contrat 3 ans</span>
+          <span class="chip">#2024-187</span>
+        </div>
+        
+        <button class="btn-ai-action" style="margin-top:12px;" onclick="showTab('rdv', document.getElementById('nav-rdv'))">
+          ✨ Ouvrir le Briefing IA avant d'entrer →
+        </button>
+      </div>
+
+      <!-- Tâches Actionnables Rapides -->
+      <div class="section-title">À faire aujourd'hui</div>
+      <div class="card">
+        <div class="todo-row" id="td1" onclick="toggleTodo('td1')">
+          <div class="todo-check"></div>
+          <div style="flex:1">
+            <div class="todo-title" style="font-size:13px; font-weight:600;">Valider bon de commande SNCF</div>
+            <div class="card-sub">Signature client reçue via YouSign</div>
+          </div>
+        </div>
+        <hr class="div">
+        <div class="todo-row" id="td2" onclick="toggleTodo('td2')">
+          <div class="todo-check"></div>
+          <div style="flex:1">
+            <div class="todo-title" style="font-size:13px; font-weight:600;">Appeler Pierre Martin (Airbus)</div>
+            <div class="card-sub">Négociation finale de l'offre expirée</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= 2. DEVIS VIVANTS (Tracking & Smart Contracts) ================= -->
+    <div id="devis" class="screen">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px">
+        <div class="card-title" style="font-size:16px">Devis intelligents</div>
+        <button class="badge b-info" onclick="alert('Création rapide via modèles IA')">+ Nouveau modèle</button>
+      </div>
+
+      <!-- Devis Vivant 1 -->
+      <div class="card">
+        <div class="card-row">
+          <div class="av-row">
+            <div class="av av-purple">BY</div>
+            <div>
+              <div class="card-title">Bouygues Construction</div>
+              <div class="card-sub">#2024-187 · Modèle standard</div>
+            </div>
+          </div>
+          <span class="badge b-warn">Envoyé (Lien)</span>
+        </div>
+        <div class="live-indicator">
+          <div class="live-dot"></div> 👀 Lu par le client il y a 10 min (3ème ouverture)
+        </div>
+        <hr class="div">
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; font-size:12px;">
+          <div><span style="color:var(--text-secondary)">Montant :</span><br><strong>48 500 €</strong></div>
+          <div><span style="color:var(--text-secondary)">Validité :</span><br><strong style="color:var(--warning)">J-10</strong></div>
+          <div><span style="color:var(--text-secondary)">Proba IA :</span><br><strong style="color:var(--success)">85%</strong></div>
+        </div>
+        <div class="pbar"><div class="pfill" style="width:85%; background:var(--success)"></div></div>
+        <button class="btn-outline-ai" onclick="alert('Relance automatique programmée à J-3 de l’expiration via e-mail intelligent')">
+          ⚙️ Relance auto programmée (J-3)
+        </button>
+      </div>
+
+      <!-- Devis Vivant 2 -->
+      <div class="card" style="border: 1px solid #fca5a5;">
+        <div class="card-row">
+          <div class="av-row">
+            <div class="av av-amber">AB</div>
+            <div>
+              <div class="card-title">Airbus Group</div>
+              <div class="card-sub">#2024-165 · Grand Compte</div>
+            </div>
+          </div>
+          <span class="badge b-danger">Expiré</span>
+        </div>
+        <div style="font-size:11px; color:var(--danger); font-weight:600; margin-top:4px;">
+          ⚠️ Non ouvert depuis 6 jours. Relance manuelle conseillée.
+        </div>
+        <hr class="div">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:12px;">
+          <div><span style="color:var(--text-secondary)">Montant :</span><br><strong>32 000 €</strong></div>
+          <div><span style="color:var(--text-secondary)">Closing estimé :</span><br><strong style="color:var(--warning)">40%</strong></div>
+        </div>
+        <div class="pbar"><div class="pfill" style="width:40%; background:var(--warning)"></div></div>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button class="badge b-info" style="flex:1; text-align:center; padding:8px;" onclick="alert('Lien de signature réactivé et copié dans le presse-papiers !')">🔗 Renvoyer le lien</button>
+          <button class="badge b-gray" style="flex:1; text-align:center; padding:8px;" onclick="alert('Simulation : Devis marqué comme perdu')">Marquer perdu</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= 3. AGENDA ENRICHI & BRIEFING IA ================= -->
+    <div id="rdv" class="screen">
+      <div class="section-title">Aujourd'hui · Mardi 10 Juin</div>
+      
+      <!-- RDV Terminé -->
+      <div class="card card-border-success" style="opacity:0.75">
+        <div class="card-row">
+          <div>
+            <div class="card-title">EDF — Direction Achat</div>
+            <div class="card-sub">09:00 - 10:30 · La Défense</div>
+          </div>
+          <span class="badge b-ok">Terminé ✓</span>
+        </div>
+        <div class="chips"><span class="chip">✨ CR IA envoyé par mail</span></div>
+      </div>
+
+      <!-- RDV Actuel ciblé avec son bloc de Briefing IA embarqué -->
+      <div class="card card-border-primary">
+        <div class="card-row">
+          <div>
+            <div class="card-title" style="font-size:15px;">Laurent Morel — Bouygues</div>
+            <div class="card-sub">14:30 · Tour Arago · Face-à-face</div>
+          </div>
+          <span class="badge b-info">14h30</span>
+        </div>
+
+        <!-- BLOC BRIEFING IA ENRICHI DIRECTEMENT VISIBLE -->
+        <div class="panel-ai">
+          <div class="panel-ai-title">✨ Briefing Pré-RDV Smart-IA</div>
+          <div class="panel-ai-body">
+            • <strong>Historique client :</strong> Actif depuis 2019. CA annuel cumulé de 210k€.<br>
+            • <strong>Dernier échange :</strong> Discussion du 15 mars axée sur le renouvellement des licences.<br>
+            • <strong>Point de vigilance :</strong> Un concurrent (Intech) a soumis une offre le mois dernier.<br>
+            • <strong>Actualité entreprise :</strong> Bouygues vient de publier un CA en hausse de +12% au T1. Parfait argument pour justifier l'extension de leur périmètre actuel.
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button class="badge b-info" style="flex:1; padding:8px;" onclick="alert('Itinéraire envoyé vers Google Maps / Waze')">🗺️ Lancer Waze</button>
+          <button class="badge b-gray" style="flex:1; padding:8px;" onclick="showTab('clients', document.getElementById('nav-clients'))">🏢 Voir Fiche 360°</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= 4. GÉNÉRATION DE DOCUMENTS (Dictée IA) ================= -->
+    <div id="docs" class="screen">
+      <div class="section-title">Dictée IA d'après-visite</div>
+      
+      <div class="dictation-box">
+        <button class="mic-btn" id="mic-trigger" onclick="startSimulatedDictation()">🎙️</button>
+        <div id="dictation-status" style="font-weight:700; font-size:14px; color:var(--neutral-dark);">Appuyez pour dicter votre retour (2 min)</div>
+        <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">Ex: "Réunion Bouygues OK, Laurent valide le volume mais veut 5% sur le lot 2..."</div>
+      </div>
+
+      <!-- Zone d'affichage des résultats magiques de l'IA -->
+      <div id="ai-results" style="display:none;">
+        <div class="section-title" style="color:var(--primary)">✨ Analyse & livrables générés par l'IA</div>
+        
+        <div class="card" style="background:#f0fdf4; border-color:#bbf7d0;">
+          <div class="card-title" style="color:#16a34a; font-size:13px;">1. Compte-rendu structuré (Prêt pour CRM)</div>
+          <div style="font-size:12px; margin-top:6px; color:#14532d; line-height:1.4;">
+            <strong>Décisions :</strong> Accord de principe sur le renouvellement du contrat principal.<br>
+            <strong>Bloquant :</strong> Négociation demandée sur le lot matériel secondaire (-5%).
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="font-size:13px;">2. Brouillon d'e-mail de suivi rédigé</div>
+          <div style="font-size:11px; background:#f8fafc; padding:8px; border-radius:8px; margin-top:6px; font-family:monospace; color:#334155;">
+            "Bonjour Laurent, merci pour votre accueil. Je vous confirme la prise en compte de votre demande d'ajustement de 5% sur le lot 2..."
+          </div>
+          <button class="badge b-info" style="width:100%; padding:6px; margin-top:8px;" onclick="alert('Email envoyé directement via votre Outlook / Gmail synchronisé !')">🚀 Valider et envoyer le mail</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= 5. FICHE CLIENT 360° INTERACTIVE ================= -->
+    <div id="clients" class="screen">
+      <div class="section-title">Vos comptes stratégiques</div>
+
+      <!-- Client 1 : Bouygues -->
+      <div class="card" onclick="toggleDetails('details-by')">
+        <div class="card-row">
+          <div class="av-row">
+            <div class="av av-purple">BY</div>
+            <div>
+              <div class="card-title">Bouygues Construction</div>
+              <div class="card-sub">Grand Compte · Depuis 2019</div>
+            </div>
+          </div>
+          <span class="badge b-ok">🔥 Très Chaud</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:600; margin-top:6px;">
+          <div><span style="color:var(--text-secondary)">CA Annuel:</span> 210 k€</div>
+          <div style="color:var(--primary)">Cliquez pour voir l'historique complet ↕</div>
+        </div>
+
+        <!-- Tiroir détails masqué / affiché en un clic -->
+        <div id="details-by" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);">
+          <div style="font-size:12px; line-height:1.5; color:var(--neutral-dark)">
+            <strong>👤 Contacts clés :</strong> Laurent Morel (Dir. Achats) · l.morel@bouygues.com<br>
+            <strong>📄 Devis lié :</strong> #2024-187 en cours (48.5k€)<br>
+            <strong>🔄 Dernier échange :</strong> Réunion physique aujourd'hui à 14h30.<br>
+            <strong>📊 Santé du compte :</strong> Excellente. Taux de fidélité estimé à 92%.
+          </div>
+        </div>
+      </div>
+
+      <!-- Client 2 : Airbus -->
+      <div class="card" onclick="toggleDetails('details-ab')">
+        <div class="card-row">
+          <div class="av-row">
+            <div class="av av-amber">AB</div>
+            <div>
+              <div class="card-title">Airbus Group</div>
+              <div class="card-sub">Grand Compte · Depuis 2020</div>
+            </div>
+          </div>
+          <span class="badge b-warn">⚠️ Tiède</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:600; margin-top:6px;">
+          <div><span style="color:var(--text-secondary)">CA Annuel:</span> 155 k€</div>
+          <div style="color:var(--primary)">Cliquez pour voir l'historique complet ↕</div>
+        </div>
+
+        <div id="details-ab" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);">
+          <div style="font-size:12px; line-height:1.5; color:var(--neutral-dark)">
+            <strong>👤 Contacts clés :</strong> Pierre Martin (Dir. Technique)<br>
+            <strong>📄 Statut Devis :</strong> #2024-165 expiré (Risque de churn concurrentiel)<br>
+            <strong>📉 Alerte IA :</strong> Baie d'activité en baisse, relance téléphonique requise immédiatement.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- /content -->
+
+  <!-- BARRE DE NAVIGATION FIXE BASSE STYLE NATIVE APPLICATION -->
+  <div class="nav-bar">
+    <button class="nav-item active" id="nav-home" onclick="showTab('home', this)">
+      <span style="font-size:20px">🏠</span><span>Tableau</span>
+    </button>
+    <button class="nav-item" id="nav-devis" onclick="showTab('devis', this)">
+      <span style="font-size:20px">📄</span><span>Devis</span>
+    </button>
+    <button class="nav-item" id="nav-rdv" onclick="showTab('rdv', this)">
+      <span style="font-size:20px">📅</span><span>Agenda</span>
+    </button>
+    <button class="nav-item" id="nav-docs" onclick="showTab('docs', this)">
+      <span style="font-size:20px">🎙️</span><span>Dictée IA</span>
+    </button>
+    <button class="nav-item" id="nav-clients" onclick="showTab('clients', this)">
+      <span style="font-size:20px">🏢</span><span>Clients 360</span>
+    </button>
+  </div>
+
+</div> <!-- /app -->
+
+<script>
+// Gestion de la navigation entre écrans (Tabs)
+function showTab(screenId, activeBtn) {
+  // Masquer tous les écrans
+  document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+  // Désactiver tous les boutons de navigation
+  document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+  
+  // Activer l'écran et le bouton désiré
+  document.getElementById(screenId).classList.add('active');
+  activeBtn.classList.add('active');
+}
+
+// Fonction To-Do interactive
+function toggleTodo(id) {
+  const element = document.getElementById(id);
+  element.classList.toggle('done');
+}
+
+// Dépliage / Repliage des détails de la fiche client 360°
+function toggleDetails(id) {
+  const panel = document.getElementById(id);
+  if (panel.style.display === "none" || panel.style.display === "") {
+    panel.style.display = "block";
+  } else {
+    panel.style.display = "none";
+  }
+}
+
+// Simulateur interactif de dictée vocale IA (Module 4)
+function startSimulatedDictation() {
+  const trigger = document.getElementById('mic-trigger');
+  const status = document.getElementById('dictation-status');
+  const results = document.getElementById('ai-results');
+  
+  trigger.classList.add('recording');
+  status.innerText = "🎙️ Enregistrement de votre voix en cours...";
+  status.style.color = "var(--danger)";
+  
+  // Simulation de traitement par le LLM après 2,5 secondes
+  setTimeout(() => {
+    trigger.classList.remove('recording');
+    status.innerText = "✓ Dictée de 2 min analysée avec succès !";
+    status.style.color = "var(--success)";
+    results.style.display = "block";
+  }, 2500);
+}
+</script>
+
+</body>
+</html>
